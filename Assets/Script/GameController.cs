@@ -8,6 +8,7 @@ public class GameController : MonoBehaviour {
 
     public Text questionDisplayText;
     public Text scoreDisplayText;
+	public Text bookingDisplayText;
     public Text timeRemainingDisplayText;
     public SimpleObjectPool answerButtonObjectPool;
     public Transform answerButtonParent;
@@ -23,6 +24,10 @@ public class GameController : MonoBehaviour {
     private int questionIndex;
     private int playerScore;
     private List<GameObject> answerButtonGameObjects = new List<GameObject>();
+	
+	public Image timerBar;
+	public float maxTime = 10f;
+	float timeLeft;
 
     // Use this for initialization
     void Start () 
@@ -30,20 +35,28 @@ public class GameController : MonoBehaviour {
         dataController = FindObjectOfType<DataController> ();
         currentRoundData = dataController.GetCurrentRoundData (3);
         questionPool = currentRoundData.questions;
-        timeRemaining = currentRoundData.timeLimitInSeconds;
-        UpdateTimeRemainingDisplay();
 
+		bookingDisplayText.text = "Booking:"+ dataController.GetCurrentPassengerData();
+		
         playerScore = 0;
         questionIndex = 0;
 
         ShowQuestion ();
         isRoundActive = true;
 
+		ResetTimer();
     }
+	
+	private void ResetTimer(){
+		// Reset timer
+		timeLeft = maxTime;
+	}
 
     private void ShowQuestion()
     {
-        RemoveAnswerButtons ();
+        ResetTimer();
+		//
+		RemoveAnswerButtons ();
         QuestionData questionData = questionPool [questionIndex];
         questionDisplayText.text = questionData.questionText;
 
@@ -108,13 +121,12 @@ public class GameController : MonoBehaviour {
     {
         if (isRoundActive) 
         {
-            timeRemaining -= Time.deltaTime;
-            UpdateTimeRemainingDisplay();
-
-            if (timeRemaining <= 0f)
-            {
-                EndRound();
-            }
+			if (timeLeft > 0){
+				timeLeft -= Time.deltaTime;
+				timerBar.fillAmount = timeLeft/maxTime;
+			}else{
+				AnswerButtonClicked(false);
+			}
 
         }
     }
