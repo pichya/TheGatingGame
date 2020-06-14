@@ -22,18 +22,25 @@ public class GameController : MonoBehaviour {
     private bool isRoundActive;
     private float timeRemaining;
     private int questionIndex;
-    private int playerScore;
+    private float playerScore;
     private List<GameObject> answerButtonGameObjects = new List<GameObject>();
 	
 	public Image timerBar;
-	public float maxTime = 10f;
+	public float maxTime = 5f;
 	float timeLeft;
 
+	public AudioSource audioSource;
+	public AudioClip winSound;
+	public AudioClip loseSound;
+	public AudioClip roundOverSound;
+	public AudioClip clickSound;
+	public AudioClip timeoutSound;
+	
     // Use this for initialization
     void Start () 
     {
         dataController = FindObjectOfType<DataController> ();
-        currentRoundData = dataController.GetCurrentRoundData (3);
+        currentRoundData = dataController.GetCurrentRoundData(dataController.GetCurrentRound());
         questionPool = currentRoundData.questions;
 
 		bookingDisplayText.text = "Booking:"+ dataController.GetCurrentPassengerData();
@@ -50,6 +57,11 @@ public class GameController : MonoBehaviour {
 	private void ResetTimer(){
 		// Reset timer
 		timeLeft = maxTime;
+	}
+	
+	private void playClip(AudioClip audioSound){
+		audioSource.clip = audioSound;
+		audioSource.Play();
 	}
 
     private void ShowQuestion()
@@ -84,20 +96,29 @@ public class GameController : MonoBehaviour {
     {
         if (isCorrect) 
         {
-            playerScore += currentRoundData.pointsAddedForCorrectAnswer;
-            scoreDisplayText.text = "Score: " + playerScore.ToString();
-        }
+            float questionScore = currentRoundData.pointsAddedForCorrectAnswer * timeLeft;
+			playerScore += questionScore;
+            scoreDisplayText.text = "SCORE: " + playerScore.ToString("F2");
+			playClip(winSound);
+			NextQuestion();
+        }else{
+			timeLeft-=1.5f;;
+			playClip(loseSound);
+		}
 
-        if (questionPool.Length > questionIndex + 1) {
+    }
+
+	public void NextQuestion(){
+		if (questionPool.Length > questionIndex + 1) {
             questionIndex++;
             ShowQuestion ();
         } else 
         {
             EndRound();
+			playClip(roundOverSound);
         }
-
-    }
-
+	}
+	
     public void EndRound()
     {
         isRoundActive = false;
@@ -108,7 +129,8 @@ public class GameController : MonoBehaviour {
 
     public void ReturnToMenu()
     {
-        SceneManager.LoadScene ("MenuScreen");
+        playClip(clickSound);
+		SceneManager.LoadScene ("MenuScreen");
     }
 
     private void UpdateTimeRemainingDisplay()
@@ -125,7 +147,8 @@ public class GameController : MonoBehaviour {
 				timeLeft -= Time.deltaTime;
 				timerBar.fillAmount = timeLeft/maxTime;
 			}else{
-				AnswerButtonClicked(false);
+				playClip(timeoutSound);
+				NextQuestion();
 			}
 
         }

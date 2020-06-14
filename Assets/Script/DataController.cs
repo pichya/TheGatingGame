@@ -30,7 +30,7 @@ public class RoundData
 {
 	public string name;
 	public int timeLimitInSeconds;
-	public int pointsAddedForCorrectAnswer;
+	public float pointsAddedForCorrectAnswer;
 	public QuestionData[] questions;
 
 }
@@ -40,6 +40,7 @@ public class DataController : MonoBehaviour
     public RoundData[] allRoundData;
 	public string bookingNumberData;
 	public string frequentflyerData;
+	public int currentRound;
 
     // Use this for initialization
     void Start ()  
@@ -54,6 +55,15 @@ public class DataController : MonoBehaviour
     {
 		return allRoundData [roundNum];
     }
+	
+	public void SetCurrentRound(int rdNum){
+		currentRound = rdNum;
+	}
+	
+	public int GetCurrentRound()
+    {
+		return currentRound;
+    }
 
 	public string GetCurrentPassengerData()
 	{
@@ -62,7 +72,7 @@ public class DataController : MonoBehaviour
 
 	public void SetCurrentPassengerData(string bn, string ff)
 	{
-		bookingNumberData = bn;
+		bookingNumberData = bn.ToUpper();
 		frequentflyerData = ff;
 	}
 

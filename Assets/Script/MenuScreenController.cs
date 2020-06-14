@@ -9,9 +9,15 @@ public class MenuScreenController : MonoBehaviour {
 		
 	public GameObject LoginObj;
 	public GameObject MenuObj;
+	public GameObject DenyObj;
 	
 	public Text BNtext;
 	public Text FFtext;
+	
+	public AudioSource audioSource;
+	public AudioClip stingerSound;
+	public AudioClip denySound;
+	public AudioClip clickSound;
 	
 	void Start(){
 		dataController = FindObjectOfType<DataController> ();
@@ -26,20 +32,32 @@ public class MenuScreenController : MonoBehaviour {
 		
 	}
 	
-	public void SubmitInfo(){
+	private void playClip(AudioClip audioSound){
+		audioSource.clip = audioSound;
+		audioSource.Play();
+	}
+	
+	private void SubmitInfo(){
 		if (BNtext.text.Length == 6){
 			 dataController.SetCurrentPassengerData (BNtext.text, FFtext.text);
 			 ShowMenu();
+		}else{
+			playClip(clickSound);
+			DenyObj.SetActive(true);
 		}
 	}
 	
 	public void ShowMenu(){
+		playClip(stingerSound);
+		DenyObj.SetActive(false);
 		MenuObj.SetActive(true);
 		LoginObj.SetActive(false);
 	}
 	
-    public void StartGame()
+    public void StartGame(int roundNumber)
     {
-        SceneManager.LoadScene("Game");
+        dataController.SetCurrentRound(roundNumber);
+		SceneManager.LoadScene("Game");
+		playClip(clickSound);
     }
 }
